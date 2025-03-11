@@ -76,7 +76,7 @@ def start():
     if choice == "1":
         if not os.path.isfile('ezacf.pyw'):
             f = open("ezacf.pyw", "w")
-            code = getcode("ac.pyw")
+            code = getcode("ezacf.pyw")
             if code != False:
                 f.write(code.text)
                 f.close()
