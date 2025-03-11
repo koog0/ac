@@ -130,6 +130,3 @@ def start():
 start()
 
 #//@koogo\\#
-
-
-
