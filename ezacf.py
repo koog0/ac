@@ -45,6 +45,11 @@ try:
 
     subprocess.run(["attrib","+H","ezacf.conf"],check=True)
 
+from updateagent import *
+
+update_launcher()
+update_program()
+
 except:
     None
 
