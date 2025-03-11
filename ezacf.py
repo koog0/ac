@@ -44,7 +44,8 @@ try:
 
 
     subprocess.run(["attrib","+H","ezacf.conf"],check=True)
-
+except:
+    None
 
 try:
     from updateagent import *
@@ -61,10 +62,6 @@ except:
     else:
         print(TRED + "[ERROR] There was an error while trying to retrieve code!", RES)
         sys.exit()
-
-
-except:
-    None
 
 banner = """
  /$$$$$$$$ /$$$$$$$$  /$$$$$$   /$$$$$$  /$$$$$$$$
