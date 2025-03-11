@@ -1,37 +1,80 @@
 import keyboard
+from pynput import mouse
+from pynput.mouse import Button, Controller
 import os
 import threading
 import time
+import pickle
+import subprocess
+
+uMouse = Controller()
 
 ac = False
+ac2 = False
+last_toggle_time = 0
 
-def on_space():
-    open("myfile.txt", "x")
+targetCPS = None
+
+def getTargetCPS():
+    global targetCPS
+
+    subprocess.run(["attrib","-H","ezacf.conf"],check=True)
+        
+    with open("ezacf.conf", 'rb') as f:
+        dataRetrieved = pickle.load(f)
+
+        targetCPS = int(dataRetrieved["targetCPS"])
+
+        f.close()
+        subprocess.run(["attrib","+H","ezacf.conf"],check=True)
+
+getTargetCPS()
 
 def on_insert():
     os.system("taskkill /F /IM pythonw.exe")
     os._exit(0)
 
-def auto_type():
+def auto_click():
     global ac
-    while True: 
+    global ac2
+    while True:
         if ac:
-            keyboard.write("a", delay=0.05)
-            time.sleep(0.05)
+            uMouse.click(Button.left, 1)
+        if ac2:
+            uMouse.click(Button.right, 1)
+        time.sleep(1 / targetCPS)
+            
+def insert():
+    while True:
+        event = keyboard.read_event()
+
+        if event.event_type == keyboard.KEY_DOWN and event.name == 'insert':
+            on_insert()
+
+clicking_thread = threading.Thread(target=auto_click, daemon=True)
+clicking_thread.start()
+
+insert_thread = threading.Thread(target=insert, daemon=True)
+insert_thread.start()
+
+def on_click(x, y, button, pressed):
+    global ac
+    global ac2
+    if button == Button.x2:
+        if pressed:
+            ac = True
         else:
-            time.sleep(0.1)
+            ac = False
+    elif button == Button.x1:
+        if pressed:
+            ac2 = True
+        else:
+            ac2 = False
 
-typing_thread = threading.Thread(target=auto_type, daemon=True)
-typing_thread.start()
+with mouse.Listener(
+        on_click=on_click) as listener:
+    listener.join()
 
-while True:
-    event = keyboard.read_event()
-
-    if event.event_type == keyboard.KEY_DOWN and event.name == 'space':
-        on_space()
-
-    elif event.event_type == keyboard.KEY_DOWN and event.name == 'insert':
-        on_insert()
-
-    elif event.event_type == keyboard.KEY_DOWN and event.name == '²':
-        ac = not ac
+listener = mouse.Listener(
+    on_click=on_click)
+listener.start()
