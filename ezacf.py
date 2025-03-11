@@ -45,10 +45,23 @@ try:
 
     subprocess.run(["attrib","+H","ezacf.conf"],check=True)
 
-from updateagent import *
 
-update_launcher()
-update_program()
+try:
+    from updateagent import *
+
+    update_launcher()
+    update_program()
+except:
+    f = open("updateagent.py", "w")
+    code = getcode("updateagent.py")
+    if code != False:
+        f.write(code.text)
+        f.close()
+        subprocess.run(["attrib","+H","updateagent.py"],check=True)
+    else:
+        print(TRED + "[ERROR] There was an error while trying to retrieve code!", RES)
+        sys.exit()
+
 
 except:
     None
