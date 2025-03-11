@@ -1,80 +1,132 @@
-import keyboard
-from pynput import mouse
-from pynput.mouse import Button, Controller
 import os
-import threading
-import time
-import pickle
+import os.path
 import subprocess
+import sys
+import pickle
+import requests
 
-uMouse = Controller()
+RES = '\033[m'
+TRED = '\033[31m'
+TGREEN = '\033[32m'
+TYELLOW = '\033[33m'
 
-ac = False
-ac2 = False
-last_toggle_time = 0
+try:
+    import keyboard
+    import pynput
+except:
+    print(TYELLOW + "[WARNING] Required dependancies were not found, installing dependancies...", RES)
+    try:
+        subprocess.run(["pip", "install", "keyboard"],check=True)
+        subprocess.run(["pip", "install", "pynput"],check=True)
 
-targetCPS = None
+        print(TGREEN + "[OK] Successfully installed dependancies", RES)
+    except:
+        None
 
-def getTargetCPS():
-    global targetCPS
+url = "https://raw.githubusercontent.com/koog0/ac/refs/heads/main/"
 
-    subprocess.run(["attrib","-H","ezacf.conf"],check=True)
-        
-    with open("ezacf.conf", 'rb') as f:
-        dataRetrieved = pickle.load(f)
+def getcode(file):
+    response = requests.get(f"{url}{file}")
+    if response.status_code == 200:
+        return response
+    else:
+        return False
 
-        targetCPS = int(dataRetrieved["targetCPS"])
+try:
+    open("ezacf.conf", "w")
+    data = {
+        "targetCPS": 10
+        }
 
+    with open("ezacf.conf", 'wb') as f:
+        pickle.dump(data, f)
         f.close()
-        subprocess.run(["attrib","+H","ezacf.conf"],check=True)
 
-getTargetCPS()
 
-def on_insert():
-    os.system("taskkill /F /IM pythonw.exe")
-    os._exit(0)
+    subprocess.run(["attrib","+H","ezacf.conf"],check=True)
 
-def auto_click():
-    global ac
-    global ac2
-    while True:
-        if ac:
-            uMouse.click(Button.left, 1)
-        if ac2:
-            uMouse.click(Button.right, 1)
-        time.sleep(1 / targetCPS)
-            
-def insert():
-    while True:
-        event = keyboard.read_event()
+except:
+    None
 
-        if event.event_type == keyboard.KEY_DOWN and event.name == 'insert':
-            on_insert()
+banner = """
+ /$$$$$$$$ /$$$$$$$$  /$$$$$$   /$$$$$$  /$$$$$$$$
+| $$_____/|_____ $$  /$$__  $$ /$$__  $$| $$_____/
+| $$           /$$/ | $$  \\ $$| $$  \\__/| $$      
+| $$$$$       /$$/  | $$$$$$$$| $$      | $$$$$   
+| $$__/      /$$/   | $$__  $$| $$      | $$__/   
+| $$        /$$/    | $$  | $$| $$    $$| $$      
+| $$$$$$$$ /$$$$$$$$| $$  | $$|  $$$$$$/| $$      
+|________/|________/|__/  |__/ \\______/ |__/
 
-clicking_thread = threading.Thread(target=auto_click, daemon=True)
-clicking_thread.start()
+//@koogo@\\\\
+"""
 
-insert_thread = threading.Thread(target=insert, daemon=True)
-insert_thread.start()
+options = """
+[[1]] - Launch
+[[2]] - Options
+[[3]] - Help
+"""
+print(TGREEN, banner, RES)
 
-def on_click(x, y, button, pressed):
-    global ac
-    global ac2
-    if button == Button.x2:
-        if pressed:
-            ac = True
-        else:
-            ac = False
-    elif button == Button.x1:
-        if pressed:
-            ac2 = True
-        else:
-            ac2 = False
+def start():
+    print(options)
 
-with mouse.Listener(
-        on_click=on_click) as listener:
-    listener.join()
+    choice = input("")
 
-listener = mouse.Listener(
-    on_click=on_click)
-listener.start()
+    if choice == "1":
+        if not os.path.isfile('ezacf.pyw'):
+            f = open("ezacf.pyw", "w")
+            code = getcode("ac.pyw")
+            if code != False:
+                f.write(code.text)
+                f.close()
+                subprocess.run(["attrib","+H","ezacf.pyw"],check=True)
+            else:
+                print(TRED + "[ERROR] There was an error while trying to retrieve code!", RES)
+                sys.exit()
+        
+        subprocess.Popen(['pythonw', 'ezacf.pyw'])
+
+    elif choice == "2":
+        subprocess.run(["attrib","-H","ezacf.conf"],check=True)
+        
+        with open("ezacf.conf", 'rb') as f:
+            dataRetrieved = pickle.load(f)
+
+            print("Current target CPS: " + TGREEN + "[" + str(dataRetrieved["targetCPS"]) + "]", RES)
+
+            choice = input("Desired target CPS: ")
+
+            while not int(choice):
+                choice = input("Desired target CPS: ")
+
+            if int(choice) <= 0:
+                choice = "1"
+            if int(choice) > 500:
+                choice = "500"
+
+            print("New target CPS: " + TGREEN + "[" + choice + "]", RES)
+
+            data = {
+            "targetCPS": int(choice)
+            }
+
+            with open("ezacf.conf", 'wb') as f:
+                pickle.dump(data, f)
+                f.close()
+
+                subprocess.run(["attrib","+H","ezacf.conf"],check=True)
+
+                f.close()
+                start()
+
+    elif choice == "3":
+        print(TGREEN + "[NEXT]" + RES + " Auto Left Click")
+        print(TGREEN + "[PREVIOUS]" + RES + " Auto Right Click")
+        print(TGREEN + "[INSERT]" + RES + " Quit")
+
+        start()
+
+start()
+
+#//@koogo\\#
