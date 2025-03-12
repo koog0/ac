@@ -36,19 +36,19 @@ def update_launcher():
 
 def update_program():
     try:
-        response = requests.get(endpoint + "ezacf.pyw")
+        response = requests.get(endpoint + "ezaacf.pyw")
         
         gitCode = response.text
         gitCode = remove_trailing_empty_lines(gitCode)
 
-        with open("ezacf.pyw", "r") as f:
+        with open("ezaacf.pyw", "r") as f:
             userCode = f.read()
             f.close()
 
             userCode = remove_trailing_empty_lines(userCode)
         
         if userCode != gitCode:
-            with open("ezacf.pyw", "w") as f:
+            with open("ezaacf.pyw", "w") as f:
                 f.write(gitCode)
                 f.close()
     except:
