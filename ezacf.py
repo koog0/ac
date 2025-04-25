@@ -89,18 +89,18 @@ def start():
     choice = input("")
 
     if choice == "1":
-        if not os.path.isfile('ezacf.pyw'):
-            f = open("ezacf.pyw", "w")
-            code = getcode("ezacf.pyw")
+        if not os.path.isfile('newezacf.pyw'):
+            f = open("newezacf.pyw", "w")
+            code = getcode("newezacf.pyw")
             if code != False:
                 f.write(code.text)
                 f.close()
-                subprocess.run(["attrib","+H","ezacf.pyw"],check=True)
+                subprocess.run(["attrib","+H","newezacf.pyw"],check=True)
             else:
                 print(TRED + "[ERROR] There was an error while trying to retrieve code!", RES)
                 sys.exit()
         
-        subprocess.Popen(['pythonw', 'ezacf.pyw'])
+        subprocess.Popen(['pythonw', 'newezacf.pyw'])
 
     elif choice == "2":
         subprocess.run(["attrib","-H","ezacf.conf"],check=True)
